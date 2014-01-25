@@ -13,13 +13,13 @@ class plgQuickiconPayPal extends JPlugin
 {
 
     private $url = 'https://api-3t.paypal.com/nvp';
+    private $success = false;
+    private $output = '';
 
     public function onGetIcons()
     {
-        $balance = '';
-
         if ($this->params->get('balance') && $this->params->get('apiuser') && $this->params->get('apipw') && $this->params->get('apisig')) {
-            $balance = $this->getBalance();
+            $this->getBalance();
         }
 
         if (version_compare(JVERSION, '3', '>=')) {
@@ -29,11 +29,21 @@ class plgQuickiconPayPal extends JPlugin
             $image = JUri::root() . 'media/paypal/paypal-logo.png';
         }
 
+        if (!empty($this->output)) {
+            if (version_compare(JVERSION, '3', '>=')) {
+                $class = $this->success ? 'success' : 'important';
+                $this->output = '<span class="label label-' . $class . '">' . $this->output . '</span>';
+            } else {
+                $class = $this->success ? 'success' : 'disabled';
+                $this->output = '<small class="' . $class . '">' . $this->output . '</small>';
+            }
+        }
+
         return array(
             array(
                 'link' => 'http://www.paypal.com',
                 'image' => $image,
-                'text' => JText::sprintf('PayPal%s', $balance),
+                'text' => JText::sprintf('PayPal %s', $this->output),
                 'id' => 'plg_quickicon_paypal'
             )
         );
@@ -61,7 +71,8 @@ class plgQuickiconPayPal extends JPlugin
 
                 $result = $http->post($this->url, $data);
             } catch (Exception $e) {
-                return $e->getMessage();
+                JFactory::getApplication()->enqueueMessage($e->getMessage());
+                return $this->output = JText::_('ERROR');
             }
 
             $cache->store($result, $key);
@@ -70,19 +81,16 @@ class plgQuickiconPayPal extends JPlugin
         if ($result->code != 200) {
             $msg = __CLASS__ . ' HTTP-Status ' . JHtml::_('link', 'http://wikipedia.org/wiki/List_of_HTTP_status_codes#' . $result->code, $result->code, array('target' => '_blank'));
             JFactory::getApplication()->enqueueMessage($msg, 'error');
-            return;
+            return $this->output = JText::_('ERROR');
         }
 
         parse_str($result->body, $result->body);
 
         if (!isset($result->body['ACK']) || $result->body['ACK'] != 'Success') {
-            return $result->body['L_SHORTMESSAGE0'];
+            return $this->output = $result->body['L_SHORTMESSAGE0'];
         }
 
-        if (version_compare(JVERSION, '3', '>=')) {
-            return ' <span class="label label-success">' . $result->body['L_AMT0'] . ' ' . $result->body['L_CURRENCYCODE0'] . '</span>';
-        } else {
-            return ' <small class="success">' . $result->body['L_AMT0'] . ' ' . $result->body['L_CURRENCYCODE0'] . '</small>';
-        }
+        $this->success = true;
+        $this->output = $result->body['L_AMT0'] . ' ' . $result->body['L_CURRENCYCODE0'];
     }
 }

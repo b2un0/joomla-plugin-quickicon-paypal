@@ -41,7 +41,7 @@ class plgQuickiconPayPal extends JPlugin
 
         return array(
             array(
-                'link' => 'http://www.paypal.com',
+                'link' => $this->params->get('url', 'http://www.paypal.com'),
                 'image' => $image,
                 'text' => JText::sprintf('PayPal %s', $this->output),
                 'id' => 'plg_quickicon_paypal'

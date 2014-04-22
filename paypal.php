@@ -53,7 +53,7 @@ class plgQuickiconPayPal extends JPlugin
     {
         $cache = JFactory::getCache('paypal', 'output');
         $cache->setCaching(1);
-        $cache->setLifeTime($this->params->get('cache', 60));
+        $cache->setLifeTime($this->params->get('cache', 60) * 60);
 
         $key = md5($this->params->toString());
 

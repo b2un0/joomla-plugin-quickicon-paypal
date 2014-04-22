@@ -65,7 +65,7 @@ class plgQuickiconPayPal extends JPlugin
                     'USER' => $this->params->get('apiuser'),
                     'PWD' => $this->params->get('apipw'),
                     'SIGNATURE' => $this->params->get('apisig'),
-                    'VERSION' => '51.0',
+                    'VERSION' => '112', // https://developer.paypal.com/webapps/developer/docs/classic/release-notes/
                     'METHOD' => 'GetBalance'
                 );
 

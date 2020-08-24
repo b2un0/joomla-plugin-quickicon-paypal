@@ -22,12 +22,7 @@ class plgQuickiconPayPal extends JPlugin
             $this->getBalance();
         }
 
-        if (version_compare(JVERSION, '3', '>=')) {
-            $image = 'paypal';
-            JFactory::getDocument()->addStyleDeclaration('.icon-paypal:before{content: url("' . JUri::root() . 'media/paypal/paypal-icon.png");}');
-        } else {
-            $image = JUri::root() . 'media/paypal/paypal-logo.png';
-        }
+        JFactory::getDocument()->addStyleDeclaration('.icon-paypal:before{content: url("' . JUri::root() . 'media/paypal/paypal-icon.png");}');
 
         if (!empty($this->output)) {
             if (version_compare(JVERSION, '3', '>=')) {
@@ -42,7 +37,7 @@ class plgQuickiconPayPal extends JPlugin
         return array(
             array(
                 'link' => $this->params->get('url', 'http://www.paypal.com'),
-                'image' => $image,
+                'image' => 'paypal',
                 'text' => JText::sprintf('PayPal %s', $this->output),
                 'id' => 'plg_quickicon_paypal'
             )
@@ -86,7 +81,7 @@ class plgQuickiconPayPal extends JPlugin
 
         parse_str($result->body, $result->body);
 
-        if (!isset($result->body['ACK']) || $result->body['ACK'] != 'Success') {
+        if (!isset($result->body['ACK']) || $result->body['ACK'] !== 'Success') {
             return $this->output = $result->body['L_SHORTMESSAGE0'];
         }
 
